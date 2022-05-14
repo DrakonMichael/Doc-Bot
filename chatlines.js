@@ -1,0 +1,23 @@
+let lines = {};
+
+lines.ru = {};
+lines.ru.normal = {};
+lines.ru.normal.entry = "Привет! Я бот-докобот. Помогу тебе собрать все документы в нужную папку.";
+lines.ru.normal.request_en = "Введи номер заявки, которую ты ведёшь:";
+lines.ru.normal.request_mail = "Введи свой gmail:";
+lines.ru.normal.setup_complete = "The setup has been completed. File uploads will be prompted from now on.";
+lines.ru.normal.document_detected = (usrnm) => `Привет, ${usrnm}\nPlease choose where to send this document.`;
+lines.ru.normal.upload = (filename, type) => `File ${filename} uploaded to ${type}`;
+
+lines.ru.context = {};
+lines.ru.context.living = "Жильё";
+lines.ru.context.transport = "Транспорт";
+lines.ru.context.passport = "Паспорт";
+lines.ru.context.cancel = "Нажми  сюда, если я не вовремя";
+
+lines.ru.error = {};
+lines.ru.error.already_created = "[ERR_ALR_CREATED]: There is already a running session in this chat.";
+lines.ru.error.no_session = "[ERR_NO_SESSION]: There is no session currently running. Begin one with /start";
+lines.ru.error.no_access = "[ERR_NO_ACCESS]: You do not have access to this command";
+
+export default lines;
