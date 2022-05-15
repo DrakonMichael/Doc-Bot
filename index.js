@@ -39,11 +39,22 @@ const bot = new Telegraf(config.token)
 bot.start((ctx) => {
     if(auth['@' + ctx.from.username]) {
         if (!groupData[ctx.message.chat.id]) {
+            let text = ctx.message.text;
             groupData[ctx.message.chat.id] = {};
-            ctx.reply(lines.ru.normal.entry);
-            ctx.reply(lines.ru.normal.request_en);
-            groupData[ctx.message.chat.id].awaitingValue = "entry_number";
-            saveData();
+            if(text.split(" ").length === 2) {
+                let [_, num] = text.split(" ");
+                groupData[ctx.message.chat.id].entry_number = num;
+                ctx.reply(lines.ru.normal.setup_complete);
+                saveData();
+            } else {
+                ctx.reply(lines.ru.normal.entry);
+                ctx.reply(lines.ru.normal.request_en);
+                groupData[ctx.message.chat.id].awaitingValue = "entry_number";
+                saveData();
+            }
+
+
+
         } else {
             ctx.reply(lines.ru.error.already_created);
         }
