@@ -123,21 +123,25 @@ async function uploadFileWithID(ctx, entryNum, type, file) {
         false
     );
 
-    folders = folderResponse.folders;
     let subfolder = null;
-    for(let i = 0; i < folders.length; i++) {
+    if(type === "count") {
+      subfolder = {id: targetFolder.id}
+    } else {
+      folders = folderResponse.folders;
+      for (let i = 0; i < folders.length; i++) {
         let f_temp = folders[i];
-        if(f_temp.name === type) {
-            subfolder = f_temp;
+        if (f_temp.name === type) {
+          subfolder = f_temp;
         }
-    }
-    // if no subfolder:
-    if(!subfolder) {
+      }
+      // if no subfolder:
+      if (!subfolder) {
         let newFolder = await googleDriveInstance.createFolder(
-            targetFolder.id,
-            type
+          targetFolder.id,
+          type
         );
         subfolder = newFolder;
+      }
     }
 
 
@@ -173,9 +177,9 @@ bot.on('message', (ctx) => {
             ctx.reply(lines.ru.normal.document_detected(ctx.from.username), {
                 reply_markup: {
                     inline_keyboard: [
-                        [ { text: lines.ru.context.living, callback_data: "ctx-housing" }],
-                        [ { text: lines.ru.context.transport, callback_data: "ctx-transport" } ],
+                        [ { text: lines.ru.context.count, callback_data: "ctx-count" }],
                         [ { text: lines.ru.context.passport, callback_data: "ctx-passport" } ],
+                        [ { text: lines.ru.context.other, callback_data: "ctx-other" } ],
                         [ { text: lines.ru.context.cancel, callback_data: "ctx-cancel" } ]
                     ]
                 }
@@ -215,6 +219,7 @@ bot.on('message', (ctx) => {
                 if(dt) {
                     ctx.reply("This session has been cleared. You may bind a new one with /start");
                     delete groupData[chatid];
+                    saveData();
                 } else {
                     ctx.reply(lines.ru.error.no_session);
                 }
@@ -224,28 +229,30 @@ bot.on('message', (ctx) => {
 
     } else {
         if(auth['@' + ctx.from.username]) {
+          if((Date.now() - ctx.message.date) < 20000) {
             ctx.reply(lines.ru.error.no_session);
+          }
         }
     }
 });
 
-bot.action("ctx-housing", (ctx) => {
+bot.action("ctx-count", (ctx) => {
     let msg = ctx.update.callback_query.message
     let data = fileQueue[msg.chat.id + ":" + msg.message_id];
 
-    uploadFileWithID(ctx, data.entry_number, "housing", data.document);
-    ctx.reply(lines.ru.normal.upload(data.document.file_name, "housing"));
+    uploadFileWithID(ctx, data.entry_number, "count", data.document);
+    ctx.reply(lines.ru.normal.upload(data.document.file_name, "count"));
     delete fileQueue[msg.chat.id + ":" + msg.message_id];
     saveData();
     ctx.deleteMessage();
 });
 
-bot.action("ctx-transport", (ctx) => {
+bot.action("ctx-other", (ctx) => {
     let msg = ctx.update.callback_query.message
     let data = fileQueue[msg.chat.id + ":" + msg.message_id];
 
-    uploadFileWithID(ctx, data.entry_number, "transport", data.document);
-    ctx.reply(lines.ru.normal.upload(data.document.file_name, "transport"));
+    uploadFileWithID(ctx, data.entry_number, "other", data.document);
+    ctx.reply(lines.ru.normal.upload(data.document.file_name, "other"));
     delete fileQueue[msg.chat.id + ":" + msg.message_id];
     saveData();
     ctx.deleteMessage();

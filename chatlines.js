@@ -7,11 +7,11 @@ lines.ru.normal.request_en = "Введи номер заявки, которую
 lines.ru.normal.request_mail = "Введи свой gmail:";
 lines.ru.normal.setup_complete = "The setup has been completed. File uploads will be prompted from now on.";
 lines.ru.normal.document_detected = (usrnm) => `Привет, ${usrnm}\nPlease choose where to send this document.`;
-lines.ru.normal.upload = (filename, type) => `File ${filename} uploaded to ${type}`;
+lines.ru.normal.upload = (filename, type) => `File ${filename} uploaded to Drive.`;
 
 lines.ru.context = {};
-lines.ru.context.living = "Жильё";
-lines.ru.context.transport = "Транспорт";
+lines.ru.context.other = "Другое";
+lines.ru.context.count = "Cчёт";
 lines.ru.context.passport = "Паспорт";
 lines.ru.context.cancel = "Нажми  сюда, если я не вовремя";
 
