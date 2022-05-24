@@ -37,7 +37,7 @@ loadData();
 
 const bot = new Telegraf(config.token)
 bot.start((ctx) => {
-    if(auth['@' + ctx.from.username]) {
+    if(auth.users.includes('@' + ctx.from.username)) {
         if (!groupData[ctx.message.chat.id]) {
             let text = ctx.message.text;
             groupData[ctx.message.chat.id] = {};
@@ -212,7 +212,7 @@ bot.on('message', (ctx) => {
             saveData();
         }
 
-        if(auth['@' + ctx.from.username]) {
+        if(auth.users.includes('@' + ctx.from.username)) {
             let messageText = ctx.message.text;
             if(messageText.startsWith("/clear")) {
                 let dt = groupData[chatid];
@@ -228,10 +228,8 @@ bot.on('message', (ctx) => {
 
 
     } else {
-        if(auth['@' + ctx.from.username]) {
-          if((Date.now() - ctx.message.date) < 20000) {
+        if(auth.users.includes('@' + ctx.from.username)) {
             ctx.reply(lines.ru.error.no_session);
-          }
         }
     }
 });
