@@ -19,5 +19,8 @@ lines.ru.error = {};
 lines.ru.error.already_created = "[ERR_ALR_CREATED]: There is already a running session in this chat.";
 lines.ru.error.no_session = "[ERR_NO_SESSION]: There is no session currently running. Begin one with /start";
 lines.ru.error.no_access = "[ERR_NO_ACCESS]: You do not have access to this command";
+lines.ru.error.no_key = "[ERR_NO_KEY]: Please enter an entry number when running /start. The command should be in form /start [case_num]."
+lines.ru.error.already_exists = (name) => `[ERR_ALREADY_EXISTS]: This entry already exists, it was created by ${name}`;
+lines.ru.error.already_exists_nn = `[ERR_ALREADY_EXISTS]: This entry already exists, but its creator could not be resolved.`;
 
 export default lines;

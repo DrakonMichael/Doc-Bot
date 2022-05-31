@@ -35,22 +35,76 @@ const saveData = () => {
 
 loadData();
 
+async function createSession(ctx) {
+  let text = ctx.message.text;
+  let [_, num] = text.split(" ");
+  if(!authenticatedGoogleDrive) return;
+
+  let folderResponse = await googleDriveInstance.listFolders(
+    config.docsFolder,
+    null,
+    false
+  );
+
+  let folders = folderResponse.folders;
+  let targetFolder = null;
+  for(let i = 0; i < folders.length; i++) {
+    let f_temp = folders[i];
+    if(f_temp.name === num) {
+      targetFolder = f_temp;
+    }
+  }
+
+  // If no folder for this entry:
+  if(!targetFolder) {
+    let newFolder = await googleDriveInstance.createFolder(
+      config.docsFolder,
+      num
+    );
+    await googleDriveInstance.create({
+      source: "DocBot Identification File\nCreated at " + Date.now(),
+      parentFolder: newFolder.id,
+      name: "@" + ctx.from.username,
+      mimeType: "text/plain"
+    });
+
+    groupData[ctx.message.chat.id] = {};
+    groupData[ctx.message.chat.id].entry_number = num;
+    ctx.reply(lines.ru.normal.setup_complete);
+    saveData();
+
+  } else {
+    let listFilesResponse = await googleDriveInstance.listFiles(
+      targetFolder.id,
+      null,
+      false
+    );
+
+    for (let file of listFilesResponse.files) {
+      if(file.name.match(/@.*/g)) {
+        ctx.reply(lines.ru.error.already_exists(file.name));
+      } else {
+        ctx.reply(lines.ru.error.already_exists_nn);
+      }
+    }
+  }
+
+}
+
+
 const bot = new Telegraf(config.token)
 bot.start((ctx) => {
     if(auth.users.includes('@' + ctx.from.username)) {
         if (!groupData[ctx.message.chat.id]) {
-            let text = ctx.message.text;
-            groupData[ctx.message.chat.id] = {};
+          let text = ctx.message.text;
+
             if(text.split(" ").length === 2) {
-                let [_, num] = text.split(" ");
-                groupData[ctx.message.chat.id].entry_number = num;
-                ctx.reply(lines.ru.normal.setup_complete);
-                saveData();
+              createSession(ctx);
             } else {
-                ctx.reply(lines.ru.normal.entry);
-                ctx.reply(lines.ru.normal.request_en);
+                ctx.reply(lines.ru.error.no_key);
+                /*ctx.reply(lines.ru.normal.request_en);
                 groupData[ctx.message.chat.id].awaitingValue = "entry_number";
-                saveData();
+                saveData();*/
             }
 
 
