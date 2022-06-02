@@ -7,7 +7,7 @@ import axios from "axios";
 import NodeGoogleDrive from "google-drive-connect";
 
 let groupData = {};
-const auth = JSON.parse(fs.readFileSync('./auth.json'));
+let auth = JSON.parse(fs.readFileSync('./auth.json')); // fallback
 let fileQueue = {};
 
 
@@ -19,6 +19,11 @@ const loadData = () => {
         if (fs.existsSync("./filequeue.json")) {
             fileQueue = JSON.parse(fs.readFileSync('./filequeue.json'));
         }
+
+        axios.get("https://script.googleusercontent.com/macros/echo?user_content_key=Imb9VanER5xDMNxw4iCRx8FCRkdLyUKABMUAPquyWVYWOFGOFoYmVgX5I9p7yjtn8qV7TRiJlujkyuxahIYhCjYJZxCMxJEhOJmA1Yb3SEsKFZqtv3DaNYcMrmhZHmUMWojr9NvTBuBLhyHCd5hHa1DEhNakbVdpw-xiMNs02Gr6rJFSx2VGaXkVln3JeMbHEripOSeari_wZtxb6pgdh36Ih_PDVyfS8vBwhW-uGZf3oJ-dqHf6LEALmaJ23tE4FMyGfXB1YOGPkXsdqiGuVZePlblETVRidZjWrZCyqFePXoxWe3mTubvN4qccPP3rtMtLBdtpr8M&lib=MeixiAciQHxXW-UB_71W9V40YdntMo1yT").then((res) => {
+          auth = res.data;
+          console.log("Successfully retrieved auth data")
+        })
     } catch(err) {
         console.error(err);
     }
@@ -83,10 +88,11 @@ async function createSession(ctx) {
     for (let file of listFilesResponse.files) {
       if(file.name.match(/@.*/g)) {
         ctx.reply(lines.ru.error.already_exists(file.name));
-      } else {
-        ctx.reply(lines.ru.error.already_exists_nn);
+        return;
       }
     }
+    ctx.reply(lines.ru.error.already_exists_nn);
+    return;
   }
 
 }
