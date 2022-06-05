@@ -11,6 +11,19 @@ let auth = JSON.parse(fs.readFileSync('./auth.json')); // fallback
 let fileQueue = {};
 
 
+const updateAuth = (callbackFunc) => {
+  axios.get("https://script.google.com/macros/s/AKfycbwBJ19REd1uKzVcx3ICGvmnbcZz_bRcuSgUA5Z2BfgRCAvd1jF8dKwqtF0BYZ1FXfU/exec?action=getUsersNS&apiKey=" + config.apiKey).then((res) => {
+    if(res.data.error) {
+      console.log("Unable to retrieve auth data, using fallback")
+      callbackFunc(res.data);
+    } else {
+      auth = res.data;
+      console.log("Successfully retrieved auth data")
+      callbackFunc(res.data);
+    }
+  })
+}
+
 const loadData = () => {
     try {
         if (fs.existsSync("./groupdata.json")) {
@@ -19,11 +32,7 @@ const loadData = () => {
         if (fs.existsSync("./filequeue.json")) {
             fileQueue = JSON.parse(fs.readFileSync('./filequeue.json'));
         }
-
-        axios.get("https://script.googleusercontent.com/macros/echo?user_content_key=Imb9VanER5xDMNxw4iCRx8FCRkdLyUKABMUAPquyWVYWOFGOFoYmVgX5I9p7yjtn8qV7TRiJlujkyuxahIYhCjYJZxCMxJEhOJmA1Yb3SEsKFZqtv3DaNYcMrmhZHmUMWojr9NvTBuBLhyHCd5hHa1DEhNakbVdpw-xiMNs02Gr6rJFSx2VGaXkVln3JeMbHEripOSeari_wZtxb6pgdh36Ih_PDVyfS8vBwhW-uGZf3oJ-dqHf6LEALmaJ23tE4FMyGfXB1YOGPkXsdqiGuVZePlblETVRidZjWrZCyqFePXoxWe3mTubvN4qccPP3rtMtLBdtpr8M&lib=MeixiAciQHxXW-UB_71W9V40YdntMo1yT").then((res) => {
-          auth = res.data;
-          console.log("Successfully retrieved auth data")
-        })
+        updateAuth(() => {});
     } catch(err) {
         console.error(err);
     }
@@ -100,28 +109,28 @@ async function createSession(ctx) {
 
 const bot = new Telegraf(config.token)
 bot.start((ctx) => {
-    if(auth.users.includes('@' + ctx.from.username)) {
-        if (!groupData[ctx.message.chat.id]) {
-          let text = ctx.message.text;
+  updateAuth(() => {
+    if (auth.users.includes('@' + ctx.from.username)) {
+      if (!groupData[ctx.message.chat.id]) {
+        let text = ctx.message.text;
 
-            if(text.split(" ").length === 2) {
-              createSession(ctx);
-            } else {
-                ctx.reply(lines.ru.error.no_key);
-                /*ctx.reply(lines.ru.normal.request_en);
-                groupData[ctx.message.chat.id].awaitingValue = "entry_number";
-                saveData();*/
-            }
-
-
-
+        if (text.split(" ").length === 2) {
+          createSession(ctx);
         } else {
-            ctx.reply(lines.ru.error.already_created);
+          ctx.reply(lines.ru.error.no_key);
+          /*ctx.reply(lines.ru.normal.request_en);
+          groupData[ctx.message.chat.id].awaitingValue = "entry_number";
+          saveData();*/
         }
-    } else {
-        ctx.reply(lines.ru.error.no_access)
-    }
 
+
+      } else {
+        ctx.reply(lines.ru.error.already_created);
+      }
+    } else {
+      ctx.reply(lines.ru.error.no_access)
+    }
+  });
 
 });
 
@@ -288,9 +297,12 @@ bot.on('message', (ctx) => {
 
 
     } else {
-        if(auth.users.includes('@' + ctx.from.username)) {
+        updateAuth(() => {
+          if(auth.users.includes('@' + ctx.from.username)) {
             ctx.reply(lines.ru.error.no_session);
-        }
+          }
+        });
+
     }
 });
 
