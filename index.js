@@ -76,7 +76,7 @@ async function createSession(ctx) {
       num
     );
     await googleDriveInstance.create({
-      source: "DocBot Identification File\nCreated at " + Date.now(),
+      source: "DocBot Identification File\nCreated at " + new Date(Date.now()).toISOString(),
       parentFolder: newFolder.id,
       name: "@" + ctx.from.username,
       mimeType: "text/plain"
